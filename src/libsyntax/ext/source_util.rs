@@ -24,6 +24,7 @@ use util::small_vector::SmallVector;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
+use rustc_data_structures::sync::Lrc;
 
 // These macros all relate to the file system; they either return
 // the column/row/filename of the expression, or they include

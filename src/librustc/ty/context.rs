@@ -846,7 +846,7 @@ pub struct GlobalCtxt<'tcx> {
                                        Lrc<StableVec<TraitCandidate>>>>>,
 
     /// Export map produced by name resolution.
-    export_map: FxHashMap<DefId, Lrc<Vec<Export>>>,
+    export_map: FxHashMap<DefId, Lrc<[Export]>>,
 
     pub hir: hir_map::Map<'tcx>,
 
@@ -859,7 +859,7 @@ pub struct GlobalCtxt<'tcx> {
     // Records the free variables refrenced by every closure
     // expression. Do not track deps for this, just recompute it from
     // scratch every time.
-    freevars: FxHashMap<DefId, Lrc<Vec<hir::Freevar>>>,
+    freevars: FxHashMap<DefId, Lrc<[hir::Freevar]>>,
 
     maybe_unused_trait_imports: FxHashSet<DefId>,
 
@@ -1254,10 +1254,10 @@ impl<'a, 'gcx, 'tcx> TyCtxt<'a, 'gcx, 'tcx> {
             types: common_types,
             trait_map,
             export_map: resolutions.export_map.into_iter().map(|(k, v)| {
-                (k, Lrc::new(v))
+                (k, Lrc::from(v))
             }).collect(),
             freevars: resolutions.freevars.into_iter().map(|(k, v)| {
-                (hir.local_def_id(k), Lrc::new(v))
+                (hir.local_def_id(k), Lrc::from(v))
             }).collect(),
             maybe_unused_trait_imports:
                 resolutions.maybe_unused_trait_imports
@@ -1335,7 +1335,7 @@ impl<'a, 'gcx, 'tcx> TyCtxt<'a, 'gcx, 'tcx> {
         self.stability_index(LOCAL_CRATE)
     }
 
-    pub fn crates(self) -> Lrc<Vec<CrateNum>> {
+    pub fn crates(self) -> Lrc<[CrateNum]> {
         self.all_crate_nums(LOCAL_CRATE)
     }
 
@@ -2450,7 +2450,7 @@ impl<'a, 'gcx, 'tcx> TyCtxt<'a, 'gcx, 'tcx> {
     }
 
     pub fn object_lifetime_defaults(self, id: HirId)
-        -> Option<Lrc<Vec<ObjectLifetimeDefault>>>
+        -> Option<Lrc<[ObjectLifetimeDefault]>>
     {
         self.object_lifetime_defaults_map(id.owner)
             .and_then(|map| map.get(&id.local_id).cloned())
@@ -2529,7 +2529,7 @@ pub fn provide(providers: &mut ty::maps::Providers) {
     };
     providers.maybe_unused_extern_crates = |tcx, cnum| {
         assert_eq!(cnum, LOCAL_CRATE);
-        Lrc::new(tcx.maybe_unused_extern_crates.clone())
+        Lrc::from(tcx.maybe_unused_extern_crates.clone())
     };
 
     providers.stability_index = |tcx, cnum| {
@@ -2552,11 +2552,11 @@ pub fn provide(providers: &mut ty::maps::Providers) {
     };
     providers.all_crate_nums = |tcx, cnum| {
         assert_eq!(cnum, LOCAL_CRATE);
-        Lrc::new(tcx.cstore.crates_untracked())
+        Lrc::from(tcx.cstore.crates_untracked())
     };
     providers.postorder_cnums = |tcx, cnum| {
         assert_eq!(cnum, LOCAL_CRATE);
-        Lrc::new(tcx.cstore.postorder_cnums_untracked())
+        Lrc::from(tcx.cstore.postorder_cnums_untracked())
     };
     providers.output_filenames = |tcx, cnum| {
         assert_eq!(cnum, LOCAL_CRATE);
